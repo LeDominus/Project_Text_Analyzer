@@ -1,0 +1,139 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-image: url('/static/images/background2.jpg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.9); /* светлый фон */
+    border-radius: 12px;
+    width: 100%;
+    max-width: 800px;
+    margin: 50px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+form input,
+form button {
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 400px;
+}
+
+input[type="file"] {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.result-container {
+    background-color: #ffffff;
+    border: 1px solid #dce3ec;
+    margin-top: 20px;
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    color: #2c3e50;
+    font-size: 16px;
+    line-height: 1.6;
+    width: 100%;
+}
+
+h1, h2 {
+    margin: 20px 0 10px;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.progress-bar {
+    height: 20px;
+    border-radius: 10px;
+    background-color: #eee;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress {
+    height: 100%;
+    border-radius: 10px;
+    background-color: #2ecc71; /* можно заменить на #3498db для синего */
+    transition: width 0.4s ease-in-out;
+}
+
+.keywords-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.keyword-tag {
+    display: inline-block;
+    background-color: #3498db;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.keyword-tag:hover {
+    background-color: #2980b9;
+    cursor: default;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+        margin: 20px;
+    }
+
+    form input,
+    form button {
+        width: 100%;
+    }
+}
+
+
+
+
+

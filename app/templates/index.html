@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализ текста с помощью ИИ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
+</head>
+    <body>
+    <div class="container">
+        <h1>AI анализ учебных изданий</h1>
+        <form action="/" method="post" enctype="multipart/form-data">
+            <label for="file-studybook">Выберите файл (PDF):</label>
+            <input type="file" name="file" id="file-studybook" accept=".pdf" required>
+            <button style="margin-top: 20px;" type="submit">Проверить</button>
+        </form>
+
+        {% if style_result or structure_result or coherence_result or read_result or keywords %}
+            <div class="result-container">
+                <h1 style="margin-top: 30px; margin-bottom: 30px;">Результаты анализа</h1>
+            </div>
+        {% endif %}
+
+        {% if style_result %}
+            <div class="result-container">
+                <h2>Стиль текста:</h2>
+                <p>{{ style_result }}</p>
+            </div>
+        {% endif %}
+        
+        {% if structure_result %}
+            <div class="result-container">
+                <h2>Оценка структуры текста:</h2>
+                <p>{{ structure_result }}</p>
+                <div class="progress-bar" 
+                style="width: {{ structure_result * 100 }}%; 
+                       background-color: {% if structure_result > 0.85 %} #3CDD2A; 
+                                         {% elif 0.5 < structure_result <= 0.85 %} #3498db; 
+                                         {% else %} #e74c3c; 
+                                         {% endif %}">
+                </div>
+                <p>{{ structure_interpret }}</p>
+            </div>
+        {% endif %}
+        
+        {% if coherence_result %}
+            <div class="result-container">
+                <h2>Оценка связности текста</h2>
+                <p>Коэффициент когерентности: {{ coherence_result }}</p>
+                <div class="progress-bar" 
+                style="width: {{ coherence_result * 100 }}%; 
+                       background-color: {% if coherence_result > 0.85 %} #3CDD2A; 
+                                         {% elif 0.5 < coherence_result <= 0.85 %} #3498db; 
+                                         {% else %} #e74c3c; 
+                                         {% endif %}">
+                </div>
+                <p>Интерпретация: {{ coherence_interpretation }}</p>
+            </div>
+        {% endif %}
+
+        {% if read_result %}
+            <div class="result-container">
+                <h2>Оценка сложности текста</h2>
+                <p>Индекс Флеша: {{ read_result['Индекс Флеша'] }}</p>
+                <p>Индекс Ганнинга: {{ read_result['Индекс Ганнинга'] }}</p>
+                <p>Количество предложений: {{ read_result['Количество предложений'] }}</p>
+                <p>Количество слов: {{ read_result['Количество слов'] }}</p>
+                <p>Сложность текста: {{ read_result['Сложность текста'] }}</p>
+            </div>
+        {% endif %}
+
+        {% if keywords %}
+            <div class="result-container">
+                <h2>Ключевые слова</h2>
+                <div class="keywords-container">
+                    {% for word in keywords %}
+                        <span class="keyword-tag">{{ word }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
