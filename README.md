@@ -3,25 +3,27 @@
 **Веб-инструмент** для анализа структуры, сложности и стиля учебных текстов с помощью BERT, TF-IDF, индекса Флеша и LLM-рекомендаций.
 
 ## 🔧 Технологии
-- **Backend:** Quart (асинхронная версия Flask)
+- **Backend:** FastAPI
 - **Frontend:** React + Ant Design
 - **ML-методы:** textstat, TF-IDF, BART, BERT
 - **LLM:** для генерации рекомендаций по улучшению учебного материала
 
 ### 💻 Минимальные требования
-- **ОС**: Windows 10/11 (64-bit)
-- **ОЗУ**: 8 ГБ (рекомендуется 16 ГБ для больших текстов)
-- **Python**: 3.9 или новее
-- **Видеокарта**: NVIDIA (желательно для ускорения BERT)
+- **ОС:** Windows 10/11 (64-bit)
+- **ОЗУ:** 8 ГБ (рекомендуется 16 ГБ для больших текстов)
+- **Python:** 3.9 или новее
+- **Видеокарта:** NVIDIA (желательно для ускорения BERT)
 
-## 🚀 Быстрый старт
+## 🚀 Быстрый старт ##
 ```bash
 git clone https://github.com/Project_Text_Analyzer.git
 cd "Project_Text_Analyzer"
 
 python -m venv venv
+
 # Linux/macOS
 source venv/bin/activate
+
 # Windows
 venv\Scripts\activate
 
@@ -29,8 +31,9 @@ pip install -r requirements.txt
 
 cd "директория с папкой app"
 python app.py
+```
 
-## 📝 Работа с сервисом
+## 📝 Работа с сервисом ##
 
 1. На главной странице загрузите PDF-файл учебного издания с помощью кнопки загрузки.
 2. Нажмите кнопку "Проверить".
