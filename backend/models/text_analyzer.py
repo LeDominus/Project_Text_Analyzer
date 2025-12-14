@@ -9,6 +9,7 @@ from models.text_preprocess import TextPreprocessor
 
 import asyncio
 
+
 class TextAnalyzer:
     def __init__(self):
         self.model_manager = ModelManager()
@@ -19,41 +20,36 @@ class TextAnalyzer:
         self.keyword_extractor = KeywordExtractor()
         self.style_classifier = StyleClassification(self.model_manager)
 
+    def _conv_to_perc(self, result):
+        """Конвертация результатов в проценты"""
+        if isinstance(result, (int, float)) and 0 <= result <= 1:
+            return result * 100
+        return result
+
     async def analyze_document(self, original_path: str, reference_path: str):
         try:
-
             original_text = self.preprocessor.extract_text_from_pdf(original_path)
             reference_text = self.preprocessor.extract_text_from_pdf(reference_path)
 
             style_result = self.style_classifier.classify_style(original_text)
-
             coherence_result = await self.coherence_analyzer.coherence_analyze(original_text)
-
             structure_result = await asyncio.to_thread(
-                self.structure_analyzer.analyze_structure,
-                original_text,
-                reference_text
+                self.structure_analyzer.analyze_structure, original_text, reference_text
             )
-
             read_result = await self.readability_analyzer.analyze_readability(original_text)
             keywords = await self.keyword_extractor.extract_keywords(original_text)
 
-            return {
-                "style_result": style_result,
-                "coherence_result": coherence_result[0],            
-                "coherence_interpretation": coherence_result[1],   
-                "structure_result": structure_result[0],
-                "structure_interpret": structure_result[1],
-                "read_result": read_result,                        
-                "keywords": keywords
+            result = {
+                "style_result": style_result,  
+                "coherence_result": self._conv_to_perc(coherence_result[0]),  
+                "coherence_interpretation": coherence_result[1],              
+                "structure_result": self._conv_to_perc(structure_result[0]),  
+                "structure_interpret": structure_result[1],                 
+                "read_result": self._conv_to_perc(read_result),               
+                "keywords": keywords,
             }
+
+            return result
 
         except Exception as e:
             raise ValueError(f"Ошибка при анализе: {e}")
-
-
-
-
-    
-    
-

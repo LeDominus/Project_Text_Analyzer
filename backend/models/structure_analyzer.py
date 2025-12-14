@@ -56,9 +56,9 @@ class StructureAnalyzer:
 
         weighted_result = (structure_similarity + weighted_similarity) / 2.0
 
-        if weighted_result > 0.85:
+        if weighted_result >= 0.8:
             interpretation = 'Структура текста соответствует стандартам'
-        elif 0.5 < weighted_result <= 0.85:
+        elif 0.5 < weighted_result < 0.8:
             interpretation = 'Структура текста требует доработки'
         else:
             interpretation = 'Структура текста не соответствует стандартам'

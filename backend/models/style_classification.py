@@ -31,8 +31,11 @@ class StyleClassification:
             )
             with torch.no_grad():
                 outputs = self.model_style(**inputs)
-                predicted_class = torch.argmax(outputs.logits, dim=1).item()
-                return styles[predicted_class] if predicted_class < len(styles) else "Неизвестный стиль"
+                
+                logits = outputs.last_hidden_state[:, 0, :]
+                
+                predicted_class = torch.argmax(logits, dim=1).item()
+                return styles[predicted_class] if predicted_class < len(styles) else "Не удалось определить стиль текста"
 
         except Exception as e:
             logger.error(f"Ошибка классификации стиля: {e}")

@@ -9,20 +9,28 @@ const { Title, Paragraph } = Typography;
 export default function Results({ results }) {
   if (!results) return null;
 
+  const coherenceValue = Math.round(results.coherence_result); // число 0-100
+  const coherenceInterpret = results.coherence_interpretation;
+
+  const structureValue = Math.round(results.structure_result);   // число 0-100
+  const structureInterpret = results.structure_interpret;
+
+  const styleText = results.style_result; // строка
+
   return (
     <Card style={{ marginTop: 20 }}>
       <Title level={4}>Результаты анализа</Title>
 
       <Paragraph>
-        <b>Стиль текста:</b> {results.style_result}
+        <b>Стиль текста:</b> {styleText}
       </Paragraph>
 
       <Row gutter={16}>
         <Col span={8}>
-          <CoherenceChart value={results.coherence_result} />
+          <CoherenceChart value={coherenceValue} description={coherenceInterpret} />
         </Col>
         <Col span={8}>
-          <StructureChart value={results.structure_result} />
+          <StructureChart value={structureValue} description={structureInterpret} />
         </Col>
         <Col span={8}>
           <ReadabilityChart value={results.read_result} />
@@ -40,4 +48,5 @@ export default function Results({ results }) {
     </Card>
   );
 }
+
 
