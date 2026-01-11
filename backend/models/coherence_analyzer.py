@@ -17,7 +17,6 @@ class CoherenceAnalyzer:
             logger.warning("Недостаточно секций для анализа когерентности")
             return 0.0, 'Недостаточно данных для анализа'
 
-        # Асинхронно получаем эмбеддинги через to_thread, потому что encode синхронный
         embeddings = await asyncio.gather(*[
             asyncio.to_thread(self.model.encode, s, convert_to_tensor=True)
             for s in sections
@@ -38,9 +37,9 @@ class CoherenceAnalyzer:
 
         avg_coherence = sum(coherence_scores) / len(coherence_scores)
 
-        if avg_coherence > 0.85:
+        if avg_coherence >= 0.75:
             interpretation = 'Текст имеет связную структуру'
-        elif 0.5 < avg_coherence <= 0.85:
+        elif 0.5 < avg_coherence < 0.75:
             interpretation = 'Текст имеет проблемы с логикой'
         else:
             interpretation = 'Текст логически не связан'

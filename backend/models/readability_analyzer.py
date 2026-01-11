@@ -17,9 +17,9 @@ class ReadabilityAnalyzer:
         sentences = re.split(r'[.!?]+', text)
 
         tasks = [
-            asyncio.to_thread(lambda: len(sentences)),                # Кол-во предложений
-            asyncio.to_thread(lambda: len(words)),                   # Кол-во слов
-            asyncio.to_thread(lambda: sum(len(re.findall(r'[аеёиоуыэюя]', w, re.IGNORECASE)) for w in words))  # Слоги
+            asyncio.to_thread(lambda: len(sentences)),
+            asyncio.to_thread(lambda: len(words)),
+            asyncio.to_thread(lambda: sum(len(re.findall(r'[аеёиоуыэюя]', w, re.IGNORECASE)) for w in words))
         ]
 
         num_sentences, num_words, num_syllables = await asyncio.gather(*tasks)

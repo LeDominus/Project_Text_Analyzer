@@ -16,7 +16,7 @@ class KeywordExtractor:
         )
         self.top_n = top_n
 
-        self.blacklist = {"млн", "тыс", "руб", "долл", "кг", "л", "см", "м"}
+        self.blacklist = {"млн", "тыс", "руб", "долл", "кг", "л", "см", "м", "чел", "мес"}
 
     async def extract_keywords(self, text: str) -> list:
         def sync_tfidf():
@@ -40,6 +40,9 @@ class KeywordExtractor:
                     continue
 
                 if any(word in seen_words for word in words):
+                    continue
+                
+                if any(len(word) <= 3 for word in words):
                     continue
 
                 seen_words.update(words)
