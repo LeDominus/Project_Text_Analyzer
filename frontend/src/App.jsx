@@ -95,6 +95,7 @@ function App() {
             <li>Стиль документа</li>
             <li>Когерентность и структура</li>
             <li>Ключевые слова и термины</li>
+            <li>Рекомендации по улучшению структуры от большой языковой модели</li>
           </ul>
         </Card>
 
@@ -311,10 +312,14 @@ function App() {
                 Рекомендация по улучшению учебного материала
               </Title>
               <TextArea
-                rows={6}
+                autoSize={{ minRows: 5, maxRows: 75 }}
                 readOnly
-                style={{ width: "100%", resize: "none" }}
-                value={results.recommendation || "Не удалось получить рекомендацию, попробуйте ещё раз"}
+                style={{ 
+                  width: "100%", 
+                  resize: "none",
+                  overflow: "hidden" 
+                }}
+                value={results.recommendation || "Не удалось получить рекомендации от LLM"}
               />
             </Card>
           </div>

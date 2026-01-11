@@ -6,8 +6,7 @@ from .coherence_analyzer import CoherenceAnalyzer
 from .readability_analyzer import ReadabilityAnalyzer
 from models.key_word_extractor import KeywordExtractor
 from models.text_preprocess import TextPreprocessor
-
-import asyncio
+from models.responses import AnalysisResult
 
 
 class TextAnalyzer:
@@ -39,17 +38,15 @@ class TextAnalyzer:
             read_result = await self.readability_analyzer.analyze_readability(original_text)
             keywords = await self.keyword_extractor.extract_keywords(original_text)
 
-            result = {
-                "style_result": style_result,  
-                "coherence_result": self._conv_to_perc(coherence_result[0]),  
-                "coherence_interpretation": coherence_result[1],              
-                "structure_result": self._conv_to_perc(structure_result[0]),  
-                "structure_interpret": structure_result[1],                 
-                "read_result": self._conv_to_perc(read_result),               
-                "keywords": keywords,
-            }
-
-            return result
+            return AnalysisResult(
+                style_result=style_result,
+                coherence_result=coherence_result[0]*100,
+                coherence_interpretation=coherence_result[1],
+                structure_result=structure_result[0]*100,
+                structure_interpret=structure_result[1],
+                read_result=read_result,
+                keywords=keywords
+            )
 
         except Exception as e:
             raise ValueError(f"Ошибка при анализе: {e}")

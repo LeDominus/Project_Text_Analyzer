@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 class StructureAnalyzer:
     section_patterns = [
         r'\b(введение|предисловие)\b',
-        r'\b(глава|лекция|тема)\s*\d+(?:\.\d+)*\b',  # изменено на non-capturing group
+        r'\b(глава|лекция|тема)\s*\d+(?:\.\d+)*\b',
         r'\bзаключение|вывод|итоги\b',
         r'\b(список использованной литературы|список рекомендованной литературы)\b',
         r'\bсодержание|оглавление\b',
@@ -56,9 +56,9 @@ class StructureAnalyzer:
 
         weighted_result = (structure_similarity + weighted_similarity) / 2.0
 
-        if weighted_result >= 0.8:
+        if weighted_result >= 0.75:
             interpretation = 'Структура текста соответствует стандартам'
-        elif 0.5 < weighted_result < 0.8:
+        elif 0.5 < weighted_result < 0.75:
             interpretation = 'Структура текста требует доработки'
         else:
             interpretation = 'Структура текста не соответствует стандартам'

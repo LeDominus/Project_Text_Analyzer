@@ -1,58 +1,70 @@
 import os
 import json
 import logging
+import warnings
+from dotenv import load_dotenv
 from openai import OpenAI
-from schemas.prompt import MODULE_PROMPT
+from schemas.prompt import PROMPT
+
+load_dotenv()
+warnings.filterwarnings('ignore')
+
+YANDEX_FOLDER = os.getenv('YANDEX_FOLDER')
+MODEL_NAME = os.getenv('MODEL_NAME')
+YANDEX_API_KEY = os.getenv('YANDEX_API_KEY')
+
+TEMPERATURE = 0.2
+MAX_OUTPUT_TOKENS = 500
 
 class LLMApi:
     def __init__(self):
-        YANDEX_FOLDER = "b1gimp7lrghrvurlm2gq"
-        MODEL_NAME = "qwen3-235b-a22b-fp8"
-        MODEL_VERSION = "latest"
+        self.api_key = YANDEX_API_KEY
+        self.folder_id = YANDEX_FOLDER
+        self.model_uri = f"gpt://{self.folder_id}/{MODEL_NAME}"
         
-        self.api_key = os.getenv("YANDEX_API_KEY")
-        self.model_uri = f"gpt://{YANDEX_FOLDER}/{MODEL_NAME}/{MODEL_VERSION}"
-
         if not self.api_key:
-            raise ValueError("Не удалось найти YANDEX_ID_KEY")
-        if not self.model_uri:
-            raise ValueError("Не удалось найти MODEL_URI")
+            raise ValueError("Не удалось найти YANDEX_API_KEY")
+        if not self.folder_id:
+            raise ValueError("Не удалось найти YANDEX_FOLDER")
 
         self.client = OpenAI(
-            api_key=self.api_key,
-            base_url="https://llm.api.cloud.yandex.net/v1"
+            api_key=os.getenv("YANDEX_API_KEY"),
+            base_url="https://rest-assistant.api.cloud.yandex.net/v1",
+            default_headers={
+                "X-Project-Id": os.getenv("YANDEX_FOLDER")
+            }
         )
 
-    def chat(self, text_material: str, analysis_results: dict, temperature=0.7, max_tokens=2000):
-        user_content = MODULE_PROMPT.format(
+    def get_common_recommendation(
+        self,
+        text_material: str,
+        analysis_results: dict,
+    ) -> str:
+        """
+        Получить одну общую рекомендацию на основе всех данных анализа
+        """
+        
+        user_content = PROMPT.format(
             text_material=text_material,
-            analysis_results=json.dumps(analysis_results, ensure_ascii=False, indent=2)
+            analysis_results=json.dumps(
+                analysis_results,
+                ensure_ascii=False,
+                indent=2
+            )
         )
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model_uri,
-                messages=[
-                    {"role": "system", "content": "Ты — эксперт по анализу учебно-методических материалов."},
-                    {"role": "user", "content": user_content}
-                ],
-                temperature=temperature,
-                max_tokens=max_tokens,
+            response = self.client.responses.create(
+                model=f"gpt://{os.getenv('YANDEX_FOLDER')}/{os.getenv('YANDEX_MODEL')}",
+                input=user_content,
+                max_output_tokens=MAX_OUTPUT_TOKENS,
+                temperature=TEMPERATURE
             )
 
-            logging.info(f"RAW response from YandexGPT: {response}")
-
-            result_text = None
-            if response.choices and response.choices[0].message:
-                result_text = response.choices[0].message.content
-
-            if not result_text:
-                result_text = "Модель не вернула текст."
-
-            return result_text
+            logging.info(f"RAW response from Yandex: {response}")
+            return response.output[0].content[0].text
 
         except Exception as e:
-            logging.error(f"Ошибка при вызове YandexGPT: {e}")
-            return "Ошибка при вызове YandexGPT"
-
+            logging.error(f"Ошибка при вызове YandexGPT: {e}", exc_info=True)
+            return "Не удалось сформировать рекомендацию. Пожалуйста, проверьте анализ по отдельным критериям"
 
