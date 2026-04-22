@@ -1,6 +1,5 @@
 import asyncio
 from .model_manager import ModelManager
-from .style_classification import StyleClassification
 from .structure_analyzer import StructureAnalyzer
 from .coherence_analyzer import CoherenceAnalyzer
 from .readability_analyzer import ReadabilityAnalyzer
@@ -17,7 +16,6 @@ class TextAnalyzer:
         self.coherence_analyzer = CoherenceAnalyzer(self.model_manager.model_bert)
         self.readability_analyzer = ReadabilityAnalyzer()
         self.keyword_extractor = KeywordExtractor()
-        self.style_classifier = StyleClassification(self.model_manager)
 
     def _conv_to_perc(self, result):
         """Конвертация результатов в проценты"""
@@ -25,24 +23,20 @@ class TextAnalyzer:
             return result * 100
         return result
 
-    async def analyze_document(self, original_path: str, reference_path: str):
+    async def analyze_document(self, original_path: str):
         try:
             original_text = self.preprocessor.extract_text_from_pdf(original_path)
-            reference_text = self.preprocessor.extract_text_from_pdf(reference_path)
-
-            style_result = self.style_classifier.classify_style(original_text)
+            
             coherence_result = await self.coherence_analyzer.coherence_analyze(original_text)
-            structure_result = await asyncio.to_thread(
-                self.structure_analyzer.analyze_structure, original_text, reference_text
-            )
+            structure_result = await asyncio.to_thread(self.structure_analyzer.analyze_structure, original_text)
             read_result = await self.readability_analyzer.analyze_readability(original_text)
             keywords = await self.keyword_extractor.extract_keywords(original_text)
 
             return AnalysisResult(
-                style_result=style_result,
-                coherence_result=coherence_result[0]*100,
-                coherence_interpretation=coherence_result[1],
-                structure_result=structure_result[0]*100,
+                coherence_result=self._conv_to_perc(coherence_result['avg_coherence']),
+                coherence_interpretation=coherence_result['interpretation'],
+                coherence_problem_zones=coherence_result['problem_zones'],
+                structure_result=self._conv_to_perc(structure_result[0]),
                 structure_interpret=structure_result[1],
                 read_result=read_result,
                 keywords=keywords

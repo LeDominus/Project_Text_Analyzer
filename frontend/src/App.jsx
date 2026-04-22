@@ -214,22 +214,6 @@ function App() {
                   </Paragraph>
                 </Card>
               </Col>
-
-              {/* Стиль */}
-              <Col xs={24} md={6}>
-                <Card
-                  style={{
-                    textAlign: "center",
-                    borderRadius: 12,
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  <Title level={5}>Стиль</Title>
-                  <Paragraph style={{ margin: 0, color: "#555" }}>
-                    {results.style_result}
-                  </Paragraph>
-                </Card>
-              </Col>
             </Row>
 
             {/* Детали анализа и ключевые слова */}
@@ -312,7 +296,7 @@ function App() {
                 Рекомендация по улучшению учебного материала
               </Title>
               <TextArea
-                autoSize={{ minRows: 5, maxRows: 75 }}
+                autoSize={{ minRows: 5, maxRows: 100 }}
                 readOnly
                 style={{ 
                   width: "100%", 

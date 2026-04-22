@@ -1,10 +1,10 @@
-from typing import List, Union, Optional
+from typing import Union, List, Dict, Any, Optional
 from pydantic import BaseModel
 
 class AnalysisResult(BaseModel):
-    style_result: str
     coherence_result: Union[float, dict]
     coherence_interpretation: str
+    coherence_problem_zones: Optional[List[Dict[str, Any]]] = None
     structure_result: Union[float, dict]
     structure_interpret: str
     read_result: Union[float, dict]
@@ -26,10 +26,18 @@ class AnalysisResult(BaseModel):
         structure = to_float(self.structure_result)
         read = to_float(self.read_result, key="score")
 
-        return (
-            f"Style: {self.style_result}, "
+        base_summary = (
             f"Coherence: {coherence:.1f}% ({self.coherence_interpretation}), "
             f"Structure: {structure:.1f}% ({self.structure_interpret}), "
             f"Readability: {read:.1f}%, "
             f"Keywords: {', '.join(self.keywords)}"
         )
+        
+        if self.coherence_problem_zones:
+            zones_desc = "; ".join(
+                f"между секциями {z['section_from']}-{z['section_to']} (сходство {z['similarity']:.2f})"
+                for z in self.coherence_problem_zones
+            )
+            base_summary += f". Проблемные переходы: {zones_desc}"
+        
+        return base_summary

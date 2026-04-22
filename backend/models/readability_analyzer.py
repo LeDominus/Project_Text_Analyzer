@@ -1,7 +1,9 @@
 import asyncio
 import re
+from functools import lru_cache
 
 class ReadabilityAnalyzer:
+    @lru_cache(maxsize=128)
     async def analyze_readability(self, text: str) -> dict:
         """Анализ читаемости текста для русского языка"""
         

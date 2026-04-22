@@ -1,68 +1,79 @@
 import re
 import logging
+from config import SECTION_PATTERNS, REFERENCE_STRUCTURE, SYNONYM_GROUPS
 
 logger = logging.getLogger(__name__)
 
 class StructureAnalyzer:
-    section_patterns = [
-        r'\b(введение|предисловие)\b',
-        r'\b(глава|лекция|тема)\s*\d+(?:\.\d+)*\b',
-        r'\bзаключение|вывод|итоги\b',
-        r'\b(список использованной литературы|список рекомендованной литературы)\b',
-        r'\bсодержание|оглавление\b',
-        r'\bприложение\s*\d*\b',
-        r'\bаннотация\b',
-        r'\bсписок таблиц\b',
-        r'\bсписок рисунков\b'
-    ]
+    def __init__(self) -> None:
+        self.section_patterns = SECTION_PATTERNS
+        self.reference_structure = REFERENCE_STRUCTURE
+        self.synonim_groups = SYNONYM_GROUPS
 
-    @classmethod
-    def extract_structure(cls, text: str) -> list:
-        structure = []
-        for pattern in cls.section_patterns:
+    def extract_structure(self, text: str) -> set:
+        structure = set()
+        for pattern in self.section_patterns:
             matches = re.findall(pattern, text, re.IGNORECASE)
             for match in matches:
                 if isinstance(match, tuple):
-                    structure.append(match[0])
+                    section_title = match[0].lower().strip()
                 else:
-                    structure.append(match)
+                    section_title = match.lower().strip()
+                structure.add(section_title)
         return structure
 
-    def analyze_structure(self, original_text: str, reference_text: str) -> tuple:
-        """Анализ структуры текста"""
-        original_structure = self.extract_structure(original_text)
-        reference_structure = self.extract_structure(reference_text)
+    def _normalize_section_name(self, section: str) -> str:
+        section_lower = section.lower()
+        for canonical, variants in self.synonim_groups.items():
+            if any(variant in section_lower for variant in variants):
+                return canonical
+        return section_lower
 
-        if not reference_structure:
-            logger.warning("Отсутствуют разделы в эталонном тексте")
-            return 0.0, "Ошибка: нет эталонной структуры"
+    def analyze_structure(self, text: str) -> tuple:
+        raw_structure = self.extract_structure(text)
+        normalized_structure = {self._normalize_section_name(sec) for sec in raw_structure}
 
-        weight_map = {
-            'введение': 1.5,
-            'заключение': 1.5,
-            'глава': 1.0,
-            'список использованной литературы': 1.0,
-            'содержание': 2.0,
-            'приложение': 1.0
+        canonical_keys = set(self.synonim_groups.keys()) | {
+            k for k in self.reference_structure.keys() 
+            if not any(k in variants for variants in self.synonim_groups.values())
         }
 
-        matching_sections = set(original_structure) & set(reference_structure)
+        total_weight = 0.0
+        matched_weight = 0.0
+        missing_sections = []
 
-        structure_similarity = len(matching_sections) / len(reference_structure) if reference_structure else 0.0
+        for key in canonical_keys:
+            weight = self.reference_structure.get(key, 1.0)
+            if key in self.synonim_groups:
+                variants = self.synonim_groups[key]
+                if any(var in normalized_structure for var in variants):
+                    matched_weight += weight
+                else:
+                    missing_sections.append(key)
+            else:
+                if key in normalized_structure:
+                    matched_weight += weight
+                else:
+                    missing_sections.append(key)
+            total_weight += weight
 
-        weighted_match = sum(weight_map.get(section.lower(), 1.0) for section in matching_sections)
-        total_weight = sum(weight_map.get(section.lower(), 1.0) for section in reference_structure)
-        weighted_similarity = weighted_match / total_weight if total_weight > 0 else 0.0
+        if total_weight == 0:
+            logger.error("Эталонная структура имеет нулевой вес")
+            return 0.0, "Ошибка: не задан эталон структуры"
 
-        weighted_result = (structure_similarity + weighted_similarity) / 2.0
+        score = matched_weight / total_weight
 
-        if weighted_result >= 0.75:
-            interpretation = 'Структура текста соответствует стандартам'
-        elif 0.5 < weighted_result < 0.75:
+        if score >= 0.75:
+            interpretation = 'Структура текста соответствует стандартам УММ'
+        elif 0.5 <= score < 0.75:
             interpretation = 'Структура текста требует доработки'
+            if missing_sections:
+                interpretation += f". Отсутствуют разделы: {', '.join(missing_sections[:3])}"
         else:
-            interpretation = 'Структура текста не соответствует стандартам'
+            interpretation = 'Структура текста не соответствует стандартам УММ'
+            if missing_sections:
+                interpretation += f". Обязательно добавить: {', '.join(missing_sections)}"
 
-        return weighted_result, interpretation
+        return score, interpretation
 
 

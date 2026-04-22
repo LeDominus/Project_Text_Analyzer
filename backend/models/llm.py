@@ -4,7 +4,8 @@ import logging
 import warnings
 from dotenv import load_dotenv
 from openai import OpenAI
-from schemas.prompt import PROMPT
+from utils.prompt import PROMPT
+from config import MAX_OUTPUT_TOKENS, TEMPERATURE, BASE_URL
 
 load_dotenv()
 warnings.filterwarnings('ignore')
@@ -12,9 +13,6 @@ warnings.filterwarnings('ignore')
 YANDEX_FOLDER = os.getenv('YANDEX_FOLDER')
 MODEL_NAME = os.getenv('MODEL_NAME')
 YANDEX_API_KEY = os.getenv('YANDEX_API_KEY')
-
-TEMPERATURE = 0.2
-MAX_OUTPUT_TOKENS = 500
 
 class LLMApi:
     def __init__(self):
@@ -29,7 +27,7 @@ class LLMApi:
 
         self.client = OpenAI(
             api_key=os.getenv("YANDEX_API_KEY"),
-            base_url="https://rest-assistant.api.cloud.yandex.net/v1",
+            base_url=BASE_URL,
             default_headers={
                 "X-Project-Id": os.getenv("YANDEX_FOLDER")
             }
@@ -60,8 +58,6 @@ class LLMApi:
                 max_output_tokens=MAX_OUTPUT_TOKENS,
                 temperature=TEMPERATURE
             )
-
-            logging.info(f"RAW response from Yandex: {response}")
             return response.output[0].content[0].text
 
         except Exception as e:

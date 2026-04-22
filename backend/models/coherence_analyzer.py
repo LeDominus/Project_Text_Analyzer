@@ -7,15 +7,19 @@ logger = logging.getLogger(__name__)
 
 class CoherenceAnalyzer:
     def __init__(self, embedding_model):
-        self.model = embedding_model  # SentenceTransformer
+        self.model = embedding_model
         self.preprocessor = TextPreprocessor()
 
-    async def coherence_analyze(self, text: str) -> tuple:
+    async def coherence_analyze(self, text: str) -> dict:
         sections = self.preprocessor.split_into_sections(text)
 
         if len(sections) < 2:
             logger.warning("Недостаточно секций для анализа когерентности")
-            return 0.0, 'Недостаточно данных для анализа'
+            return {
+                'avg_coherence': 0.0,
+                'interpretation': 'Недостаточно данных для анализа',
+                'problem_zones': []
+            }
 
         embeddings = await asyncio.gather(*[
             asyncio.to_thread(self.model.encode, s, convert_to_tensor=True)
@@ -33,7 +37,11 @@ class CoherenceAnalyzer:
 
         if not coherence_scores:
             logger.error("Не удалось рассчитать когерентность")
-            return 0.0, 'Ошибка в данных'
+            return {
+                'avg_coherence': 0.0,
+                'interpretation': 'Ошибка в данных',
+                'problem_zones': []
+            }
 
         avg_coherence = sum(coherence_scores) / len(coherence_scores)
 
@@ -44,6 +52,19 @@ class CoherenceAnalyzer:
         else:
             interpretation = 'Текст логически не связан'
 
-        return avg_coherence, interpretation
+        problem_zones = []
+        for i, score in enumerate(coherence_scores):
+            if score < 0.5:
+                problem_zones.append({
+                    'section_from': i + 1,
+                    'section_to': i + 2,
+                    'similarity': round(score, 3)
+                })
+
+        return {
+            'avg_coherence': avg_coherence,
+            'interpretation': interpretation,
+            'problem_zones': problem_zones
+        }
 
 

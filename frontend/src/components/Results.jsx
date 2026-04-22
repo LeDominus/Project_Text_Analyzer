@@ -15,15 +15,9 @@ export default function Results({ results }) {
   const structureValue = Math.round(results.structure_result);   // число 0-100
   const structureInterpret = results.structure_interpret;
 
-  const styleText = results.style_result; // строка
-
   return (
     <Card style={{ marginTop: 20 }}>
       <Title level={4}>Результаты анализа</Title>
-
-      <Paragraph>
-        <b>Стиль текста:</b> {styleText}
-      </Paragraph>
 
       <Row gutter={16}>
         <Col span={8}>

@@ -6,16 +6,25 @@ import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-
 from models.llm import LLMApi
 from models.responses import AnalysisResult
 from models.text_analyzer import TextAnalyzer
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 warnings.filterwarnings("ignore")
 
 UPLOAD_FOLDER = "temp"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+logger.info("==== [INFO] Приложение запущено! ==== ")
 
 app = FastAPI()
 
@@ -32,27 +41,17 @@ async def analyze(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Поддерживаются только PDF файлы")
 
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-
+    
+    logger.info("==== [INFO] Анализируем... ==== ")
     try:
         with open(file_path, "wb") as f:
             f.write(await file.read())
 
-        reference_path = os.getenv("REFERENCE_PATH")
-        if not reference_path or not os.path.exists(reference_path):
-            raise HTTPException(
-                status_code=500,
-                detail="Reference файл не найден"
-            )
-
         analyzer = TextAnalyzer()
         llm = LLMApi()
 
-        analysis_results = await analyzer.analyze_document(
-            original_path=file_path,
-            reference_path=reference_path
-        )
+        analysis_results = await analyzer.analyze_document(original_path=file_path)
 
         common_recommendation = llm.get_common_recommendation(
             text_material=analysis_results.summary,
@@ -63,7 +62,8 @@ async def analyze(file: UploadFile = File(...)):
             **analysis_results.dict(exclude={"recommendation"}),
             recommendation=common_recommendation 
         )
-
+        
+        logger.info("==== [INFO] Анализ завершён успешно! ==== ")
         return results
 
     except HTTPException:
